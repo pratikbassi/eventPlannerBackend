@@ -4,16 +4,16 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Event
+from .models import Event, Track
 import json
 
 # Create your views here.
 
 
 @csrf_exempt
-def get(request):
+def show(request):
     """
-    View to return a list of events in JSON format.
+    View to return a list of events and tracks in JSON format.
     """
 
     events = Event.objects.all()
@@ -27,13 +27,14 @@ def get(request):
             'end_time': event.end_time.isoformat(),
             'created_at': event.created_at.isoformat(),
             'updated_at': event.updated_at.isoformat(),
+            'track': event.track.id if event.track else None,
         })
 
     return JsonResponse(returnList, safe=False, )
 
 
 @csrf_exempt
-def post(request):
+def create_event(request):
     """
     View to create a new event.
     """
@@ -59,7 +60,7 @@ def post(request):
 
 
 @csrf_exempt
-def put(request):
+def update_event(request):
     """
     View to update an event.
     """
@@ -81,7 +82,7 @@ def put(request):
 
 
 @csrf_exempt
-def delete(request):
+def delete_event(request):
     """
     View to delete an event.
     """
@@ -94,5 +95,64 @@ def delete(request):
             return JsonResponse({'status': 'success'})
         except Event.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Event not found'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def create_track(request):
+    """
+    View to create a new track.
+    """
+    if request.method == 'POST':
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+
+        title = body.get('title')
+        description = body.get('description')
+
+        track = Track(
+            title=title,
+            description=description
+        )
+        track.save()
+        return JsonResponse({'status': 'success', 'track_id': track.id})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def update_track(request):
+    """
+    View to update a track.
+    """
+    if request.method == 'PATCH':
+        track_id = request.PATCH.get('track_id')
+        new_title = request.PATCH.get('new_title')
+        new_description = request.PATCH.get('new_description')
+
+        try:
+            track = Track.objects.get(id=track_id)
+            track.title = new_title
+            track.description = new_description
+            track.save()
+            return JsonResponse({'status': 'success'})
+        except Track.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Track not found'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def delete_track(request):
+    """
+    View to delete a track.
+    """
+    if request.method == 'DELETE':
+        track_id = request.POST.get('track_id')
+
+        try:
+            track = Track.objects.get(id=track_id)
+            track.delete()
+            return JsonResponse({'status': 'success'})
+        except Track.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Track not found'})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
