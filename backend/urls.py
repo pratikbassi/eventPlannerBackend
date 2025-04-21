@@ -21,10 +21,11 @@ from api import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/events/', views.show, name='list_events'),
-    path('api/event/create', views.create_event, name='create_event'),
-    path('api/event/update/<int:id>', views.update_event, name='update_event'),
-    path('api/event/destroy/<int:id>', views.delete_event, name='delete_event'),
-    path('api/track/<int:id>', views.create_track, name='create_track'),
-    path('api/track/update/<int:id>', views.update_track, name='track_events'),
-    path('api/track/delete/<int:id>', views.delete_track, name='delete_track'),
+    path('api/event/create/', views.create_event, name='create_event'),
+    path('api/event/update/<int:eventID>', views.update_event, name='update_event'),
+    path('api/event/destroy/<int:eventID>', views.delete_event, name='delete_event'),
+    path('api/tracks/', views.show_tracks, name='list_tracks'),
+    path('api/track/<int:trackID>', views.create_track, name='create_track'),
+    path('api/track/update/<int:trackID>', views.update_track, name='track_events'),
+    path('api/track/delete/<int:trackID>', views.delete_track, name='delete_track'),
 ]
